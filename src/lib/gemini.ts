@@ -1,41 +1,7 @@
-import express from 'express';
-import path from 'path';
-import { createServer as createViteServer } from 'vite';
-import { GoogleGenAI } from '@google/genai';
-import dotenv from 'dotenv';
-
-dotenv.config();
-
-// Create Express app
-const app = express();
-app.use(express.json());
-
-const PORT = 3000;
-
-// Initialize Gemini SDK lazily to avoid crashing on start if API key is missing
-let ai: GoogleGenAI | null = null;
-const apiKey = process.env.GEMINI_API_KEY;
-
-if (apiKey && apiKey !== 'MY_GEMINI_API_KEY' && apiKey.trim() !== '') {
-  try {
-    ai = new GoogleGenAI({
-      apiKey: apiKey,
-      httpOptions: {
-        headers: {
-          'User-Agent': 'aistudio-build',
-        },
-      },
-    });
-    console.log('Gemini AI successfully initialized server-side.');
-  } catch (err) {
-    console.error('Error initializing Gemini AI SDK:', err);
-  }
-} else {
-  console.log('Gemini API Key missing or using placeholder. Running in smart mock backup mode.');
-}
+import { GoogleGenAI } from "@google/genai";
 
 // Business context loaded to guide AI responses
-const BUSINESS_CONTEXT = `
+export const BUSINESS_CONTEXT = `
 You are BizPilot AI, an elite, brilliant AI Business Copilot and CFO Advisor for Apex Builders Supply & Paints (an SME based in India/Global selling construction materials, premium paints, metals, plywood, and tools).
 Here is the current operational business state of Apex Builders Supply:
 - Current Date/Year: July 2026
@@ -70,7 +36,7 @@ When requested to:
 `;
 
 // Smart local fallback responses if API is down/unset
-function generateSmartMockResponse(prompt: string): string {
+export function generateSmartMockResponse(prompt: string): string {
   const p = prompt.toLowerCase();
   
   if (p.includes('quotation') || p.includes('quote')) {
@@ -199,7 +165,7 @@ To maximize our profits and clear stock of slower accessories, BizPilot recommen
 - **Financial Rationale:** UltraShield Paint has a gross margin of **29%** ($35 profit per tub). Heavy Duty Brushes have a high margin of **40%** but move slowly. Combining them clears accessory stock and increases total paint cart size by 15%.
 
 #### **Campaign 2: The "Foundation Builder" Discount**
-- **Target Audience:** Large commercial builders (like Verma Construction, Elite Builders).
+- **Target Audience:** Commercial builders (like Verma Construction, Elite Builders).
 - **The Deal:** Buy **1000 Bags of Portland Cement Grade 43**, get **1 Bundle of TMT Steel Reinforcement Bars at 5% Off**.
 - **Financial Rationale:** Cement is a high-volume, low-margin driver. Steel bars are high-value. This incentive locks in the client for their steel requirements which usually go to separate competitors.
 
@@ -239,20 +205,44 @@ I am your business partner for **Apex Builders Supply & Paints**. Here is a quic
 What can I help you automate or analyze today?`;
 }
 
-// API endpoint for AI Copilot Chat
-app.post('/api/copilot', async (req, res) => {
-  const { prompt, history } = req.body;
+// Lazy initialization of Gemini client using client-side API key
+let aiClient: GoogleGenAI | null = null;
 
-  if (!prompt) {
-    return res.status(400).json({ error: 'Prompt is required' });
+function getGeminiClient(): GoogleGenAI | null {
+  if (aiClient) return aiClient;
+
+  // WARNING: Exposing VITE_GEMINI_API_KEY in frontend builds carries security risks.
+  // In production, keep this server-side.
+  const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY;
+
+  if (apiKey && apiKey !== 'MY_GEMINI_API_KEY' && apiKey.trim() !== '') {
+    try {
+      aiClient = new GoogleGenAI({
+        apiKey: apiKey,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build',
+          },
+        },
+      });
+      console.log("Client-side Gemini AI successfully initialized.");
+      return aiClient;
+    } catch (err) {
+      console.error("Error initializing client-side Gemini AI SDK:", err);
+    }
   }
+  return null;
+}
 
-  if (!ai) {
-    // If Gemini API is not initialized, run the smart fallback engine
-    console.log('Gemini API not configured. Serving smart fallback response.');
-    return setTimeout(() => {
-      res.json({ text: generateSmartMockResponse(prompt) });
-    }, 1200); // simulate thinking network delay
+/**
+ * Executes a Copilot prompt on the client side using VITE_GEMINI_API_KEY
+ */
+export async function getCopilotResponse(prompt: string, history: any[] = []): Promise<string> {
+  const client = getGeminiClient();
+
+  if (!client) {
+    console.log("Gemini API key not configured or invalid. Serving local smart mock backup.");
+    return generateSmartMockResponse(prompt);
   }
 
   try {
@@ -261,13 +251,12 @@ app.post('/api/copilot', async (req, res) => {
       parts: [{ text: msg.content }]
     }));
 
-    // Add prompt as the latest turn
     const contents = [
       ...formattedHistory,
       { role: 'user', parts: [{ text: prompt }] }
     ];
 
-    const response = await ai.models.generateContent({
+    const response = await client.models.generateContent({
       model: 'gemini-3.5-flash',
       contents,
       config: {
@@ -276,28 +265,30 @@ app.post('/api/copilot', async (req, res) => {
       },
     });
 
-    res.json({ text: response.text || generateSmartMockResponse(prompt) });
-  } catch (error: any) {
-    console.error('Gemini API server call failed:', error);
-    // Graceful fallback if live API fails
-    res.json({ 
-      text: generateSmartMockResponse(prompt), 
-      warning: 'Gemini live server is currently busy. Displaying automated local intelligence model.' 
-    });
+    return response.text || generateSmartMockResponse(prompt);
+  } catch (error) {
+    console.error("Gemini client-side call failed, falling back:", error);
+    return generateSmartMockResponse(prompt);
   }
-});
+}
 
-// API endpoint for automatic dashboard recommendations / insights
-app.get('/api/insights', async (req, res) => {
-  if (!ai) {
-    return res.json({
-      recommendation: 'Reorder UltraShield Premium Paint (20L) and Fine River Sand today. Contact Sharma Traders to collect outstanding $4,200 payment.',
-      score: 84
-    });
+/**
+ * Fetches automatic dashboard insights on the client side using VITE_GEMINI_API_KEY
+ */
+export async function getDashboardInsights(): Promise<{ recommendation: string; score: number }> {
+  const client = getGeminiClient();
+
+  const fallback = {
+    recommendation: 'Reorder UltraShield Premium Paint (20L) and Fine River Sand today. Contact Sharma Traders to collect outstanding $4,200 payment.',
+    score: 84
+  };
+
+  if (!client) {
+    return fallback;
   }
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await client.models.generateContent({
       model: 'gemini-3.5-flash',
       contents: 'Provide a concise, single-sentence summary recommendation to display on the main dashboard for the CEO of Apex Builders Supply, along with an integer score from 1 to 100 indicating the current health of the business (where 100 is perfect and cash-flow/inventory are pristine). Output strictly as JSON with keys "recommendation" (string) and "score" (integer).',
       config: {
@@ -307,39 +298,12 @@ app.get('/api/insights', async (req, res) => {
     });
 
     const parsed = JSON.parse(response.text || '{}');
-    res.json({
-      recommendation: parsed.recommendation || 'Reorder paint and river sand today; alert Sharma Traders of pending dues.',
-      score: parsed.score || 84
-    });
+    return {
+      recommendation: parsed.recommendation || fallback.recommendation,
+      score: parsed.score || fallback.score
+    };
   } catch (err) {
-    res.json({
-      recommendation: 'Reorder UltraShield Premium Paint (20L) and Fine River Sand today. Contact Sharma Traders to collect outstanding $4,200 payment.',
-      score: 84
-    });
+    console.error("Dashboard insights client-side call failed:", err);
+    return fallback;
   }
-});
-
-// Configure Vite middleware or serve static production bundle
-async function setupServer() {
-  if (process.env.NODE_ENV !== 'production') {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    });
-    app.use(vite.middlewares);
-    console.log('Vite developer server middleware integrated.');
-  } else {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
-    console.log('Production static build file server configured.');
-  }
-
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running and listening at http://0.0.0.0:${PORT}`);
-  });
 }
-
-setupServer();

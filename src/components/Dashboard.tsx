@@ -4,6 +4,7 @@ import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContai
 import { DollarSign, IndianRupee, ShoppingCart, Users, AlertTriangle, TrendingUp, Sparkles, AlertCircle, ArrowUpRight, ArrowDownRight, Clock, ShieldCheck, Mail, ClipboardCopy, Send } from 'lucide-react';
 import { Product, Customer, Order, Insight } from '../types';
 import { REVENUE_HISTORY, CATEGORY_REVENUE } from '../mockData';
+import { getDashboardInsights } from '../lib/gemini';
 
 interface DashboardProps {
   products: Product[];
@@ -31,18 +32,15 @@ export default function Dashboard({
 
   const symbol = currency === 'INR' ? '₹' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$';
 
-  // Load insights from full-stack backend on mount
+  // Load insights from client-side Gemini on mount
   useEffect(() => {
     async function fetchServerInsights() {
       try {
-        const res = await fetch('/api/insights');
-        if (res.ok) {
-          const data = await res.json();
-          setAiInsight(data.recommendation);
-          setHealthScore(data.score);
-        }
+        const data = await getDashboardInsights();
+        setAiInsight(data.recommendation);
+        setHealthScore(data.score);
       } catch (err) {
-        console.error('Failed to load server insights, using fallback.', err);
+        console.error('Failed to load insights, using fallback.', err);
       } finally {
         setLoadingInsights(false);
       }

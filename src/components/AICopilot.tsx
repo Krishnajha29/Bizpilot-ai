@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Bot, User, Send, Mic, MicOff, Copy, ClipboardCheck, Sparkles, AlertCircle, RefreshCw, HelpCircle } from 'lucide-react';
 import { Message } from '../types';
+import { getCopilotResponse } from '../lib/gemini';
 
 interface AICopilotProps {
   initialPrompt?: string;
@@ -245,31 +246,18 @@ export default function AICopilot({ initialPrompt, onClearInitialPrompt }: AICop
     setIsThinking(true);
 
     try {
-      // Send message to Express full-stack API route
-      const res = await fetch('/api/copilot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prompt: trimmed,
-          history: messages.slice(-10) // provide matching window of previous conversations
-        })
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        const assistantMsg: Message = {
-          id: `a-${Date.now()}`,
-          sender: 'assistant',
-          content: data.text,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-        setMessages(prev => [...prev, assistantMsg]);
-      } else {
-        throw new Error('API request failed');
-      }
+      // Get response directly from client-side Gemini AI
+      const replyText = await getCopilotResponse(trimmed, messages.slice(-10));
+      const assistantMsg: Message = {
+        id: `a-${Date.now()}`,
+        sender: 'assistant',
+        content: replyText,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      setMessages(prev => [...prev, assistantMsg]);
     } catch (err) {
       console.error(err);
-      // Hard fallback if backend completely crashes
+      // Hard fallback if Gemini call fails
       setTimeout(() => {
         setMessages(prev => [...prev, {
           id: `a-${Date.now()}`,

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Bot, X, Send, RefreshCw, MessageSquareCode, Sparkles } from 'lucide-react';
 import { Message } from '../types';
+import { getCopilotResponse } from '../lib/gemini';
 
 export default function FloatingAssistant() {
   const [isOpen, setIsOpen] = useState(false);
@@ -39,24 +40,14 @@ export default function FloatingAssistant() {
     setIsThinking(true);
 
     try {
-      const res = await fetch('/api/copilot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt: trimmed, history: messages.slice(-4) })
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        const assistantMsg: Message = {
-          id: `fa-${Date.now()}`,
-          sender: 'assistant',
-          content: data.text,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        };
-        setMessages(prev => [...prev, assistantMsg]);
-      } else {
-        throw new Error('Quick AI API failed');
-      }
+      const replyText = await getCopilotResponse(trimmed, messages.slice(-4));
+      const assistantMsg: Message = {
+        id: `fa-${Date.now()}`,
+        sender: 'assistant',
+        content: replyText,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      };
+      setMessages(prev => [...prev, assistantMsg]);
     } catch (err) {
       console.error(err);
       setTimeout(() => {
