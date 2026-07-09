@@ -147,30 +147,6 @@ BizPilot AI enables SMEs to:
 - Enhance customer experience
 - Accelerate digital transformation
 
----
-
-# 📸 Screenshots
-
-> Add screenshots of:
-
-- Landing Page
-- Dashboard
-- AI Copilot
-- Inventory
-- Analytics
-- Quotation Generator
-
----
-
-# 🎥 Demo
-
-**Live Demo**
-
-(Add your deployed project link)
-
-**Demo Video**
-
-(Add your Google Drive or YouTube link)
 
 ---
 
