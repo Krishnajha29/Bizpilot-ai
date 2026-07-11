@@ -24,6 +24,7 @@ interface InventoryProps {
   onRestock: (productId: string, quantity: number) => void;
   onNavigateToCopilot: (initialPrompt?: string) => void;
   currency?: string;
+  onAddAuditLog?: (action: string, affectedRecord: string, status: 'SUCCESS' | 'WARNING' | 'FAILED' | 'PENDING' | 'BLOCKED', operator?: string) => void;
 }
 
 type SortField = 'name' | 'stock' | 'price' | 'category' | 'warehouseLocation';
@@ -43,7 +44,8 @@ export default function Inventory({
   setPurchaseOrders,
   onRestock,
   onNavigateToCopilot,
-  currency = 'INR'
+  currency = 'INR',
+  onAddAuditLog
 }: InventoryProps) {
   // Navigation & View tabs
   const [activeTab, setActiveTab] = useState<TabId>('ledger');
@@ -566,6 +568,9 @@ export default function Inventory({
         aiRecommendation: `New product line established from supplier invoice. Maintain regular supply buffers in ${predictedCategory}.`
       };
 
+      const ocrConfidence = typeof item.confidence === 'number' ? item.confidence : 100;
+      const isUncertain = ocrConfidence < 90;
+
       return {
         id: `vitem-${Math.random()}`,
         extractedName: item.productName,
@@ -585,7 +590,10 @@ export default function Inventory({
         currentCost,
         newCost,
         isCreated: matchType === 'new', // Auto-completed candidate ready to go!
-        createdProduct: candidateProductDetails
+        createdProduct: candidateProductDetails,
+        ocrConfidence,
+        isUncertain,
+        isVerified: false
       };
     });
 
@@ -611,6 +619,19 @@ export default function Inventory({
           userChoice: choice,
           newStock,
           newCost
+        };
+      }
+      return item;
+    }));
+  };
+
+  // User manual verification for uncertain OCR rows
+  const handleVerifyRow = (id: string) => {
+    setVerificationData(prev => prev.map(item => {
+      if (item.id === id) {
+        return {
+          ...item,
+          isVerified: true
         };
       }
       return item;
@@ -664,6 +685,16 @@ export default function Inventory({
   // Commit dynamic changes to inventory states after verification
   const handleCommitInvoice = () => {
     if (!extractionResult) return;
+
+    // Check if any low-confidence OCR rows are unverified
+    const unverifiedUncertainRows = verificationData.filter(item => item.isUncertain && !item.isVerified);
+    if (unverifiedUncertainRows.length > 0) {
+      setOcrError(`Enterprise Compliance Block: There are ${unverifiedUncertainRows.length} low-confidence extracted rows that must be manually reviewed and verified (click "Verify Row") before commitment.`);
+      return;
+    }
+
+    // Reset error state on success
+    setOcrError(null);
 
     const todayStr = new Date().toISOString().split('T')[0];
     let updatedProducts = [...products];
@@ -883,6 +914,16 @@ export default function Inventory({
       console.warn("Could not save to localStorage:", err);
     }
 
+    if (onAddAuditLog) {
+      onAddAuditLog('Inventory Imported', `Inv #${extractionResult.invoiceNumber} (${extractionResult.supplierName})`, 'SUCCESS', 'SAP AI Core Process');
+      if (!existingSupplier) {
+        onAddAuditLog('Supplier Added', `${supplierNameNormal}`, 'SUCCESS', 'SAP AI Core Process');
+      }
+      verificationData.forEach(item => {
+        onAddAuditLog('Stock Updated', `${item.extractedName} (+${item.incomingQty} ${item.unit})`, 'SUCCESS', 'SAP AI Core Process');
+      });
+    }
+
     // Trigger AI dashboard forecast recalculation
     refreshAIRecommendations();
 
@@ -985,6 +1026,16 @@ export default function Inventory({
     };
     
     setSupplierLedger(prev => [...prev, ledgerEntry]);
+
+    if (onAddAuditLog) {
+      onAddAuditLog('Purchase Order Approved', `PO #${selectedPO.poNumber} (Supplier: ${selectedPO.supplierName})`, 'SUCCESS', 'Store In-charge');
+      selectedPO.items.forEach(item => {
+        const recQty = receivedQtys[item.productName] !== undefined ? receivedQtys[item.productName] : item.quantity;
+        if (recQty > 0) {
+          onAddAuditLog('Stock Updated', `${item.productName} (+${recQty} ${item.unit})`, 'SUCCESS', 'Store In-charge');
+        }
+      });
+    }
 
     setShowReceiveModal(false);
     setSelectedPO(null);
@@ -2412,12 +2463,52 @@ export default function Inventory({
                       <tbody>
                         {verificationData.map((item, idx) => {
                           const isCreated = item.isCreated;
+                          const isMatchPossible = item.matchType === 'possible' || item.matchType === 'duplicate';
                           
                           return (
-                            <tr key={idx} className="border-b border-slate-900 text-slate-300 hover:bg-white/1 bg-zinc-950/20">
+                            <tr key={idx} className={`border-b border-slate-900 text-slate-300 hover:bg-white/1 transition-all ${
+                              item.isUncertain && !item.isVerified
+                                ? 'bg-amber-500/5 hover:bg-amber-500/10 border-l-2 border-l-amber-500'
+                                : 'bg-zinc-950/20'
+                            }`}>
                               <td className="p-3">
-                                <span className="font-semibold text-white block">{item.extractedName}</span>
-                                <span className="text-[10px] text-slate-500 font-mono block mt-0.5">HSN: {item.hsnCode} • Unit: {item.unit}</span>
+                                <div className="flex items-start gap-2.5">
+                                  <div className="space-y-1">
+                                    <span className="font-semibold text-white block">{item.extractedName}</span>
+                                    <span className="text-[10px] text-slate-500 font-mono block">HSN: {item.hsnCode} • Unit: {item.unit}</span>
+                                    
+                                    {/* OCR Extraction Confidence Indicator */}
+                                    {item.ocrConfidence !== undefined && (
+                                      <div className="flex items-center gap-1.5 mt-1">
+                                        <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${
+                                          item.isUncertain 
+                                            ? 'bg-rose-500/10 text-rose-400' 
+                                            : 'bg-emerald-500/10 text-emerald-400'
+                                        }`}>
+                                          OCR Match: {item.ocrConfidence}%
+                                        </span>
+                                        {item.isUncertain && (
+                                          <>
+                                            {item.isVerified ? (
+                                              <span className="inline-flex items-center gap-0.5 text-[9px] text-emerald-400 font-mono font-bold bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                                                <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                                                Verified
+                                              </span>
+                                            ) : (
+                                              <button
+                                                type="button"
+                                                onClick={() => handleVerifyRow(item.id)}
+                                                className="px-2 py-0.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-mono font-extrabold text-[9px] rounded transition-all cursor-pointer shadow shadow-amber-500/20"
+                                              >
+                                                Verify Row
+                                              </button>
+                                            )}
+                                          </>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
                               </td>
                               <td className="p-3">
                                 <div className="space-y-1.5">
@@ -2427,11 +2518,11 @@ export default function Inventory({
                                       <Check className="w-3.5 h-3.5" />
                                       <span>Existing Product (✓ Increase Stock)</span>
                                     </div>
-                                  ) : item.matchType === 'duplicate' ? (
+                                  ) : isMatchPossible ? (
                                     <div className="space-y-1">
                                       <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] bg-amber-500/10 border border-amber-500/20 text-amber-400 font-bold">
                                         <AlertTriangle className="w-3.5 h-3.5" />
-                                        <span>Possible Duplicate ({item.similarity}%)</span>
+                                        <span>Possible Match ({item.similarity}%)</span>
                                       </div>
                                       {item.similarity < 70 && (
                                         <div className="text-[10px] text-rose-400 font-mono font-bold flex items-center gap-1 mt-0.5">
@@ -2446,9 +2537,9 @@ export default function Inventory({
                                       <span>🆕 New Product (Create candidate)</span>
                                     </div>
                                   )}
-
+ 
                                   {/* Interactive Choice Toggle for duplicates or ambiguous lines */}
-                                  {item.matchType === 'duplicate' && (
+                                  {isMatchPossible && (
                                     <div className="flex items-center gap-1.5 bg-zinc-900/80 border border-slate-800 p-1 rounded-lg w-max mt-1">
                                       <button
                                         type="button"
@@ -2474,7 +2565,7 @@ export default function Inventory({
                                       </button>
                                     </div>
                                   )}
-
+ 
                                   {/* Action Setup buttons */}
                                   {item.userChoice === 'new' && (
                                     <div className="mt-1">

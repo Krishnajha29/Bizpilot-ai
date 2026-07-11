@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
+import { classifyIntent, AgentType } from '../lib/gemini';
 import { 
   Download, 
   Copy, 
@@ -376,6 +377,8 @@ export default function BusinessDocument({ text, msgId, onRegenerate, onSendProm
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [shared, setShared] = useState(false);
+
+  const agent = classifyIntent(text);
 
   // Check categories
   const isDoc = text.includes('[DOC_TYPE]');
@@ -778,6 +781,27 @@ export default function BusinessDocument({ text, msgId, onRegenerate, onSendProm
   return (
     <div className="space-y-6 my-1 w-full text-slate-200">
       
+      {/* Current Active Agent Indicator */}
+      <div className="flex flex-col gap-1 px-3.5 py-2 rounded-xl bg-zinc-950/60 border border-slate-800/80 w-fit mb-2">
+        <span className="text-[8px] text-slate-500 font-mono font-bold uppercase tracking-wider">Current Agent:</span>
+        <div className="flex items-center gap-2">
+          <div className={`w-1.5 h-1.5 rounded-full animate-pulse ${
+            agent === 'Sales Assistant' ? 'bg-amber-400' :
+            agent === 'Billing & GST Expert' ? 'bg-emerald-400' :
+            agent === 'Inventory Manager' ? 'bg-sky-400' :
+            agent === 'Warehouse Manager' ? 'bg-orange-400' :
+            agent === 'Procurement Advisor' ? 'bg-pink-400' :
+            agent === 'Supplier Manager' ? 'bg-rose-400' :
+            agent === 'Customer Relationship Manager' ? 'bg-blue-400' :
+            agent === 'Financial CFO Advisor' ? 'bg-indigo-400' :
+            'bg-violet-400'
+          }`} />
+          <span className="text-[10px] font-black font-display tracking-wide uppercase text-slate-200">
+            {agent}
+          </span>
+        </div>
+      </div>
+
       {/* 1. SUCCESS MESSAGE BANNER */}
       {isDoc && successMsg && (
         <motion.div 

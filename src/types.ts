@@ -168,3 +168,12 @@ export interface BusinessPreferences {
   alertThresholdPercent: number;
   paymentReminderDays: number;
 }
+
+export interface AuditLog {
+  id: string;
+  timestamp: string;
+  operator: string;
+  action: string;
+  affectedRecord: string;
+  status: 'SUCCESS' | 'WARNING' | 'FAILED' | 'PENDING' | 'BLOCKED';
+}

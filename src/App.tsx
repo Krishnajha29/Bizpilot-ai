@@ -12,7 +12,7 @@ import Reports from './components/Reports';
 import Settings from './components/Settings';
 import FloatingAssistant from './components/FloatingAssistant';
 
-import { Product, Customer, Order, Insight, CompanyProfile, BusinessPreferences, InventoryMovement, SupplierLedgerEntry, PurchaseOrder, Supplier } from './types';
+import { Product, Customer, Order, Insight, CompanyProfile, BusinessPreferences, InventoryMovement, SupplierLedgerEntry, PurchaseOrder, Supplier, AuditLog } from './types';
 import {
   INITIAL_CUSTOMERS,
   INITIAL_ORDERS,
@@ -27,6 +27,49 @@ import {
   INITIAL_PURCHASE_ORDERS,
   INITIAL_SUPPLIERS
 } from './erpMockData';
+
+const INITIAL_AUDIT_LOGS: AuditLog[] = [
+  {
+    id: 'log-1',
+    timestamp: '2026-07-10 16:30:12',
+    operator: 'Krishna (CEO)',
+    action: 'Invoice Generated',
+    affectedRecord: 'INV-2026-408 (Sharma Traders)',
+    status: 'SUCCESS'
+  },
+  {
+    id: 'log-2',
+    timestamp: '2026-07-10 14:15:22',
+    operator: 'SAP AI Core Process',
+    action: 'Inventory Imported',
+    affectedRecord: 'Inv #INV-994A (GreenPly Industries)',
+    status: 'SUCCESS'
+  },
+  {
+    id: 'log-3',
+    timestamp: '2026-07-09 11:20:05',
+    operator: 'Krishna (CEO)',
+    action: 'Quotation Created',
+    affectedRecord: 'QT-2026-092 (Verma Construction)',
+    status: 'SUCCESS'
+  },
+  {
+    id: 'log-4',
+    timestamp: '2026-07-08 09:44:18',
+    operator: 'System Scheduler',
+    action: 'Stock Updated',
+    affectedRecord: 'TMT Steel Reinforcement Bars',
+    status: 'SUCCESS'
+  },
+  {
+    id: 'log-5',
+    timestamp: '2026-07-07 15:02:11',
+    operator: 'Krishna (CEO)',
+    action: 'Customer Added',
+    affectedRecord: 'Verma Construction Ltd.',
+    status: 'SUCCESS'
+  }
+];
 
 export default function App() {
   // Core Page Router states
@@ -46,12 +89,29 @@ export default function App() {
   const [insights, setInsights] = useState<Insight[]>(INITIAL_INSIGHTS);
   const [companyProfile, setCompanyProfile] = useState<CompanyProfile>(DEFAULT_COMPANY);
   const [preferences, setPreferences] = useState<BusinessPreferences>(DEFAULT_PREFERENCES);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
 
   // Core Mutators to keep mock databases functional
+  const addAuditLog = (action: string, affectedRecord: string, status: 'SUCCESS' | 'WARNING' | 'FAILED' | 'PENDING' | 'BLOCKED' = 'SUCCESS', operator: string = 'Krishna (CEO)') => {
+    const newLog: AuditLog = {
+      id: `log-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      timestamp: new Date().toISOString().replace('T', ' ').split('.')[0],
+      operator,
+      action,
+      affectedRecord,
+      status
+    };
+    setAuditLogs(prev => [newLog, ...prev]);
+  };
+
   const handleRestockProduct = (productId: string, quantity: number) => {
     setProducts(prev =>
       prev.map(p => (p.id === productId ? { ...p, stock: p.stock + quantity } : p))
     );
+    const prod = products.find(p => p.id === productId);
+    if (prod) {
+      addAuditLog('Stock Updated', `${prod.name} (+${quantity} ${prod.unit}s)`, 'SUCCESS');
+    }
   };
 
   const handleAddQuotationAsOrder = (newOrderData: any) => {
@@ -66,6 +126,7 @@ export default function App() {
     };
 
     setOrders(prev => [newOrder, ...prev]);
+    addAuditLog('Invoice Generated', `${newOrder.id} (${newOrder.customerName})`, 'SUCCESS');
   };
 
   const handleNavigateToCopilot = (promptText?: string) => {
@@ -222,6 +283,7 @@ export default function App() {
             setPurchaseOrders={setPurchaseOrders}
             onRestock={handleRestockProduct}
             onNavigateToCopilot={handleNavigateToCopilot}
+            onAddAuditLog={addAuditLog}
             currency={companyProfile.currency}
           />
         )}
@@ -250,6 +312,7 @@ export default function App() {
             customers={customers}
             orders={orders}
             insights={insights}
+            auditLogs={auditLogs}
             currency={companyProfile.currency}
           />
         )}

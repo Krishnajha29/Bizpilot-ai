@@ -26,9 +26,9 @@ function ThinkingSteps({ agent }: { agent: AgentType }) {
           "📦 Verifying stock levels in real-time...",
           "📄 Generating tax quotation draft..."
         ];
-      case 'Billing Assistant':
+      case 'Billing & GST Expert':
         return [
-          "🧾 Billing Agent routing active...",
+          "🧾 Billing & GST Expert routing active...",
           "💼 Parsing tax ledger records...",
           "🧮 Calculating CGST, SGST, and IGST portions...",
           "🏢 Generating e-invoice credentials...",
@@ -38,11 +38,19 @@ function ThinkingSteps({ agent }: { agent: AgentType }) {
       case 'Inventory Manager':
         return [
           "📦 Inventory Manager routing active...",
-          "🏗 Checking warehouse physical counts...",
+          "🏗 Checking inventory stock levels...",
           "🏷 Matching SKUs and barcode indexes...",
           "⚖ Updating stock thresholds and limits...",
           "🚚 Verifying logistics and dock availability...",
           "📝 Recording stock adjustment logs..."
+        ];
+      case 'Warehouse Manager':
+        return [
+          "🏢 Warehouse Manager routing active...",
+          "🗺 Mapping physical coordinates & shelves...",
+          "🏷 Locating bin tags and aisle dividers...",
+          "📦 Designing optimal pick & pack path...",
+          "🚚 Coordinating warehouse dock logistics..."
         ];
       case 'Procurement Advisor':
         return [
@@ -53,18 +61,34 @@ function ThinkingSteps({ agent }: { agent: AgentType }) {
           "📈 Predicting stock-out velocity curves...",
           "📄 Drafting supplier purchase order..."
         ];
-      case 'CFO Advisor':
+      case 'Supplier Manager':
         return [
-          "🤖 CFO Advisory routing active...",
+          "🤝 Supplier Manager routing active...",
+          "📋 Retrieving vendor compliance profile...",
+          "💳 Evaluating outstanding creditor balances...",
+          "⚖ Analyzing payment terms (Net 30/45)...",
+          "📊 Compiling supplier purchase performance..."
+        ];
+      case 'Customer Relationship Manager':
+        return [
+          "👥 Customer Relationship Manager active...",
+          "📈 Pulling B2B client credit accounts...",
+          "💳 Checking receivables & aging balances...",
+          "⚠️ Evaluating credit limit breaches...",
+          "📞 Framing follow-up payment communication..."
+        ];
+      case 'Financial CFO Advisor':
+        return [
+          "🤖 Financial CFO Advisory active...",
           "📊 Loading global sales & profit ledgers...",
           "🧮 Running Monte Carlo profit simulations...",
           "📉 Checking solvency and aging receivables...",
           "💡 Generating cost optimization suggestions...",
           "🧠 Structuring C-Suite executive recommendations..."
         ];
-      case 'Analytics Engine':
+      case 'Analytics Intelligence':
         return [
-          "📈 Analytics Engine routing active...",
+          "📈 Analytics Intelligence active...",
           "📊 Aggregating multi-month revenue arrays...",
           "🧠 Running seasonal regression models...",
           "👥 Identifying highest-value customer nodes...",
@@ -98,12 +122,7 @@ function ThinkingSteps({ agent }: { agent: AgentType }) {
       <div className="flex items-center gap-2 mb-2 border-b border-slate-800/40 pb-1.5">
         <div className="w-3.5 h-3.5 border-2 border-brand-indigo border-t-transparent rounded-full animate-spin shrink-0" />
         <span className="text-[10px] font-bold text-white font-mono uppercase tracking-widest">
-          {agent === 'Sales Assistant' ? 'Sales Assistant' :
-           agent === 'Billing Assistant' ? 'Billing Assistant' :
-           agent === 'Inventory Manager' ? 'Inventory Manager' :
-           agent === 'Procurement Advisor' ? 'Procurement Advisor' :
-           agent === 'CFO Advisor' ? 'CFO Advisor Engine' :
-           'Analytics Engine'}
+          {agent}
         </span>
       </div>
       <div className="space-y-2">
@@ -139,7 +158,7 @@ function ThinkingSteps({ agent }: { agent: AgentType }) {
 export default function AICopilot({ initialPrompt, onClearInitialPrompt }: AICopilotProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [activeAgent, setActiveAgent] = useState<AgentType>('CFO Advisor');
+  const [activeAgent, setActiveAgent] = useState<AgentType>('Financial CFO Advisor');
   const [isThinking, setIsThinking] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [speechSupported, setSpeechSupported] = useState(false);
@@ -311,10 +330,13 @@ export default function AICopilot({ initialPrompt, onClearInitialPrompt }: AICop
               <span className="text-[9px] text-slate-500 font-mono uppercase tracking-wider">Current Agent:</span>
               <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded font-mono ${
                 activeAgent === 'Sales Assistant' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-                activeAgent === 'Billing Assistant' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                activeAgent === 'Billing & GST Expert' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
                 activeAgent === 'Inventory Manager' ? 'bg-sky-500/10 text-sky-400 border border-sky-500/20' :
+                activeAgent === 'Warehouse Manager' ? 'bg-orange-500/10 text-orange-400 border border-orange-500/20' :
                 activeAgent === 'Procurement Advisor' ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20' :
-                activeAgent === 'CFO Advisor' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' :
+                activeAgent === 'Supplier Manager' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
+                activeAgent === 'Customer Relationship Manager' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
+                activeAgent === 'Financial CFO Advisor' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' :
                 'bg-violet-500/10 text-violet-400 border border-violet-500/20'
               }`}>
                 {activeAgent}

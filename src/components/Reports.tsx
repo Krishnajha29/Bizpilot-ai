@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { FileText, Download, Sparkles, AlertCircle, TrendingUp, DollarSign, Calendar, RefreshCw, BarChart2, ShieldCheck, CheckCircle2 } from 'lucide-react';
-import { Product, Customer, Order, Insight } from '../types';
+import { Product, Customer, Order, Insight, AuditLog } from '../types';
 import { REVENUE_HISTORY } from '../mockData';
 import { formatCurrency } from '../lib/format';
 import jsPDF from 'jspdf';
@@ -12,12 +12,13 @@ interface ReportsProps {
   customers: Customer[];
   orders: Order[];
   insights: Insight[];
+  auditLogs?: AuditLog[];
   currency?: string;
 }
 
-type ReportType = 'monthly' | 'weekly' | 'inventory' | 'customer';
+type ReportType = 'monthly' | 'weekly' | 'inventory' | 'customer' | 'audit';
 
-export default function Reports({ products, customers, orders, insights, currency = 'INR' }: ReportsProps) {
+export default function Reports({ products, customers, orders, insights, auditLogs = [], currency = 'INR' }: ReportsProps) {
   const [activeReport, setActiveReport] = useState<ReportType>('monthly');
   const [exporting, setExporting] = useState(false);
 
@@ -130,6 +131,21 @@ export default function Reports({ products, customers, orders, insights, currenc
             <div className="text-xs">
               <p className="font-bold font-display">B2B Customer Accounts</p>
               <p className="text-[10px] text-slate-500 mt-0.5">Receivables & credit records</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setActiveReport('audit')}
+            className={`w-full p-4 rounded-xl border text-left flex items-center gap-3 transition-all cursor-pointer ${
+              activeReport === 'audit'
+                ? 'bg-brand-indigo/15 border-brand-indigo/40 text-white font-semibold'
+                : 'bg-[#09090b]/40 border-slate-800/60 text-slate-400 hover:text-white hover:bg-[#09090b]'
+            }`}
+          >
+            <ShieldCheck className="w-5 h-5 text-violet-500" />
+            <div className="text-xs">
+              <p className="font-bold font-display">Compliance Audit Trail</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">Cryptographic system activity</p>
             </div>
           </button>
         </div>
@@ -348,6 +364,57 @@ export default function Reports({ products, customers, orders, insights, currenc
                             <td className="p-3 text-right">{formatCurrency(c.totalSpent)}</td>
                             <td className={`p-3 text-right font-bold ${c.outstandingBalance > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
                               {formatCurrency(c.outstandingBalance)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 5. Enterprise Audit Logs report */}
+            {activeReport === 'audit' && (
+              <div className="space-y-6 py-8">
+                <div className="flex justify-between items-center border-b border-gray-100 pb-3">
+                  <h3 className="text-base font-bold font-display text-gray-900">Enterprise Operations Audit Trail</h3>
+                  <span className="px-2 py-1 text-[9px] font-bold font-mono text-indigo-600 bg-indigo-50 border border-indigo-100 rounded">ISO-27001 SECURED</span>
+                </div>
+                
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  Real-time cryptographic audit trail of critical enterprise resource operations. Every log retains an immutable record of action type, target ID, operator, status, and precise timestamp.
+                </p>
+
+                <div className="space-y-3">
+                  <span className="text-[10px] font-bold text-gray-400 tracking-wider uppercase block">COMPLIANCE LOG ENTRIES</span>
+                  <div className="border border-gray-200 rounded-xl overflow-hidden">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead className="bg-gray-50 border-b border-gray-200 text-gray-500">
+                        <tr>
+                          <th className="p-3 font-semibold font-display">Timestamp</th>
+                          <th className="p-3 font-semibold font-display">Operator</th>
+                          <th className="p-3 font-semibold font-display">Action Type</th>
+                          <th className="p-3 font-semibold font-display">Affected Record</th>
+                          <th className="p-3 font-semibold font-display text-center">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="text-gray-600 font-mono text-[11px]">
+                        {(auditLogs || []).map((log) => (
+                          <tr key={log.id} className="border-b border-gray-100 hover:bg-slate-50/50 transition-colors">
+                            <td className="p-3 text-gray-500 text-nowrap">{log.timestamp}</td>
+                            <td className="p-3 font-sans font-semibold text-gray-800">{log.operator}</td>
+                            <td className="p-3 font-bold text-indigo-600">{log.action}</td>
+                            <td className="p-3 text-gray-700">{log.affectedRecord}</td>
+                            <td className="p-3 text-center">
+                              <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold font-mono ${
+                                log.status === 'SUCCESS' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' :
+                                log.status === 'WARNING' ? 'bg-amber-50 text-amber-700 border border-amber-100' :
+                                log.status === 'BLOCKED' ? 'bg-orange-50 text-orange-700 border border-orange-100' :
+                                'bg-rose-50 text-rose-700 border border-rose-100'
+                              }`}>
+                                {log.status}
+                              </span>
                             </td>
                           </tr>
                         ))}

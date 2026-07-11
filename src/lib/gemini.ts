@@ -161,61 +161,94 @@ Simulation Format:
 [SIMULATION_END]
 `;
 
-export type AgentType = 'Sales Assistant' | 'Billing Assistant' | 'Inventory Manager' | 'Procurement Advisor' | 'CFO Advisor' | 'Analytics Engine';
+export type AgentType = 
+  | 'Sales Assistant' 
+  | 'Inventory Manager' 
+  | 'Warehouse Manager' 
+  | 'Procurement Advisor' 
+  | 'Supplier Manager' 
+  | 'Customer Relationship Manager' 
+  | 'Billing & GST Expert' 
+  | 'Financial CFO Advisor' 
+  | 'Analytics Intelligence';
 
 export function classifyIntent(prompt: string): AgentType {
   const p = prompt.toLowerCase();
   
-  // 1. CFO Advisor Triggers (explicit analytical/strategic questions)
+  // 1. Financial CFO Advisor Triggers (explicit strategic questions, simulations)
   if (
     p.includes('analyze profit') || p.includes('improve margin') || p.includes('business report') ||
     p.includes('financial health') || p.includes('cash flow') || p.includes('cashflow') ||
     p.includes('growth analysis') || p.includes('cost optimization') || p.includes('receivable analysis') ||
     p.includes('working capital') || p.includes('expense optimization') || p.includes('analyze my profit') ||
     p.includes('analyze the profit') || p.includes('analyze my business') || p.includes('simulate') ||
-    p.includes('what happens if') || p.includes('what if')
+    p.includes('what happens if') || p.includes('what if') || p.includes('cfo') || p.includes('solvency')
   ) {
-    return 'CFO Advisor';
+    return 'Financial CFO Advisor';
   }
 
-  // 2. Analytics Engine Triggers (reporting, charts, trends)
+  // 2. Analytics Intelligence Triggers (reporting, charts, trends)
   if (
-    p.includes('chart') || p.includes('trend') || p.includes('top customer') ||
-    p.includes('seasonality') || p.includes('demand forecasting') || p.includes('dashboard') ||
-    p.includes('explain dashboard') || p.includes('kpi') || p.includes('intelligence') ||
-    p.includes('sales trend') || p.includes('revenue chart') || p.includes('predict') ||
-    p.includes('forecasting') || p.includes('prediction') || p.includes('sales dynamics')
+    p.includes('chart') || p.includes('trend') || p.includes('seasonality') || 
+    p.includes('demand forecasting') || p.includes('dashboard') || p.includes('explain dashboard') || 
+    p.includes('kpi') || p.includes('intelligence') || p.includes('sales trend') || 
+    p.includes('revenue chart') || p.includes('predict') || p.includes('forecasting') || 
+    p.includes('prediction') || p.includes('sales dynamics') || p.includes('analytics')
   ) {
-    return 'Analytics Engine';
+    return 'Analytics Intelligence';
   }
 
-  // 3. Billing Assistant (Invoices, billing, payment records)
+  // 3. Billing & GST Expert (Invoices, billing, payment records, tax portions)
   if (
     p.includes('invoice') || p.includes('bill') || p.includes('gst summary') ||
     p.includes('e-invoice') || p.includes('tax invoice') || p.includes('payment record') ||
-    p.includes('convert quotation') || p.includes('convert quote') || p.includes('billing')
+    p.includes('convert quotation') || p.includes('convert quote') || p.includes('billing') ||
+    p.includes('cgst') || p.includes('sgst') || p.includes('igst') || p.includes('tax rate') || p.includes('hsn')
   ) {
-    return 'Billing Assistant';
+    return 'Billing & GST Expert';
   }
 
-  // 4. Procurement Advisor (PO creation, supplier pricing comparisons, replenishment)
+  // 4. Procurement Advisor (PO creation, replenishment thresholds, lead times)
   if (
     p.includes('purchase order') || p.includes('po') || p.includes('reorder') ||
-    p.includes('supplier price') || p.includes('compare price') || p.includes('lead time') ||
-    p.includes('stock-out') || p.includes('stockout') || p.includes('procurement') ||
-    p.includes('replenish') || p.includes('restock')
+    p.includes('lead time') || p.includes('stock-out') || p.includes('stockout') || 
+    p.includes('procurement') || p.includes('replenish') || p.includes('restock')
   ) {
     return 'Procurement Advisor';
   }
 
-  // 5. Inventory Manager (Stock levels, physical operations, warehouding)
+  // 5. Warehouse Manager (Physical locations, shelves, bins, layout, physical operations)
   if (
-    p.includes('inventory') || p.includes('stock') || p.includes('warehouse') ||
-    p.includes('sku') || p.includes('import supplier') || p.includes('adjust stock') ||
-    p.includes('adjustments') || p.includes('incoming') || p.includes('receive') ||
-    p.includes('movement')
+    p.includes('warehouse') || p.includes('location') || p.includes('shelf') || 
+    p.includes('bin') || p.includes('aisle') || p.includes('wh-') || p.includes('barcode')
+  ) {
+    return 'Warehouse Manager';
+  }
+
+  // 6. Inventory Manager (Stock levels, SKU management, adjustments)
+  if (
+    p.includes('inventory') || p.includes('stock') || p.includes('sku') || 
+    p.includes('import supplier') || p.includes('adjust stock') || p.includes('adjustments') || 
+    p.includes('incoming') || p.includes('receive') || p.includes('movement')
   ) {
     return 'Inventory Manager';
+  }
+
+  // 7. Supplier Manager (Vendors, creditor status, ledger, outstanding balance)
+  if (
+    p.includes('supplier') || p.includes('vendor') || p.includes('creditor') || 
+    p.includes('supplier price') || p.includes('compare price') || p.includes('supplier ledger')
+  ) {
+    return 'Supplier Manager';
+  }
+
+  // 8. Customer Relationship Manager (Clients, outstanding dues, credit limits, payment terms)
+  if (
+    p.includes('customer') || p.includes('client') || p.includes('receivable') || 
+    p.includes('outstanding balance') || p.includes('contact') || p.includes('payment terms') ||
+    p.includes('credit limit') || p.includes('sharma') || p.includes('verma') || p.includes('gupta') || p.includes('elite')
+  ) {
+    return 'Customer Relationship Manager';
   }
 
   // Default is Sales Assistant (deals with quotations, client pricing, etc.)
@@ -247,47 +280,62 @@ CRITICAL OPERATIONAL RULES:
   4. Upload a BOQ"
   Wait for the user to make a choice before writing any document.
 `,
-  'Billing Assistant': `
-ROLE: Invoice & Billing Agent
-RESPONSIBILITIES: Generate invoices, convert quotation to invoice, record payment, calculate GST, generate GST summary, generate e-invoice, export PDF.
+  'Billing & GST Expert': `
+ROLE: Billing & GST Expert
+RESPONSIBILITIES: Generate tax invoices, convert quotations to invoices, calculate CGST, SGST, IGST fractions correctly, generate HSN summaries, record payments, and manage B2B billing records.
 CRITICAL OPERATIONAL RULES:
-- Focus purely on tax invoice creation and transaction billing.
-- NEVER generate business analysis, executive reports, financial optimization insights, market trends, or [RECOMMENDATION_START] ... [RECOMMENDATION_END] tags.
-- Keep your responses extremely clean, fast, action-oriented, and brief (Max 150-250 words).
+- Focus strictly on billing precision, tax fractions (usually 18% split 9% CGST and 9% SGST), and compliant invoices.
+- Never output [RECOMMENDATION_START] or [SIMULATION_START] blocks unless explicitly asked for business strategy advice.
+- Keep responses clean, concise, and focused on transaction billing details.
 `,
   'Inventory Manager': `
-ROLE: Inventory & Warehouse Agent
-RESPONSIBILITIES: Import supplier invoice, extract products, match inventory, create new SKU, merge existing SKU, increase stock, receive Purchase Order, track warehouse movement, restock suggestions, supplier matching, stock adjustments.
+ROLE: Inventory Manager
+RESPONSIBILITIES: Manage product stock counts, track inventory movements, manage SKUs, perform stock adjustments, process incoming purchase receipt records, and keep the material database updated.
 CRITICAL OPERATIONAL RULES:
-- Focus strictly on warehouse, stock, SKU, and physical logistics operations.
-- Do NOT talk about strategic market forecasts, business financial health, profitability, or customer margins.
-- Do NOT output [RECOMMENDATION_START] ... [RECOMMENDATION_END] tags.
-- Keep your response brief, precise, operational, and focused on inventory ledger updates (Max 150-250 words).
+- Focus entirely on stock availability, item descriptions, and inventory transactions.
+- Keep responses fast and concise. No generic advice.
+`,
+  'Warehouse Manager': `
+ROLE: Warehouse Manager
+RESPONSIBILITIES: Map and manage physical warehouse locations (e.g. WH-A1-Shelf3), guide product bin organization, organize material storage aisles, optimize stock pick paths, and manage barcodes/locations.
+CRITICAL OPERATIONAL RULES:
+- Focus on the physical storage, shelving, coordinates, and physical layout of materials in the warehouse.
+- Keep answers practical, layout-aware, and highly operational.
 `,
   'Procurement Advisor': `
-ROLE: Procurement Agent
-RESPONSIBILITIES: Generate Purchase Orders (PO), suggest suppliers, compare supplier prices, recommend reorder quantities, predict stock-outs, lead time analysis.
+ROLE: Procurement Advisor
+RESPONSIBILITIES: Generate Purchase Orders (POs) to suppliers, analyze material replenishment thresholds, predict low-stock scenarios, and manage supply delays.
 CRITICAL OPERATIONAL RULES:
-- Focus on material sourcing, purchase order generation, supplier cost comparisons, and stocking thresholds.
-- Do NOT include general customer sales trends, customer receivable reports, or general CFO long reports.
-- DO NOT output [RECOMMENDATION_START] ... [RECOMMENDATION_END] tags.
-- Keep responses concise, direct, and operational (Max 150-250 words).
+- Focus purely on supplier ordering workflows, draft compliant purchase orders, and monitor restocking levels.
+- Do not output strategic CFO projections or customer-side sales documents.
 `,
-  'CFO Advisor': `
-ROLE: CFO Advisor
-RESPONSIBILITIES: Analyze profit, improve margins, business reports, financial health, cash flow, growth analysis, cost optimization, receivable analysis, revenue forecasting, expense optimization, working capital.
+  'Supplier Manager': `
+ROLE: Supplier Manager
+RESPONSIBILITIES: Manage supplier vendor relationships, evaluate supplier outstanding credit ledgers, compare material pricing among suppliers, and track payment terms.
+CRITICAL OPERATIONAL RULES:
+- Focus on vendor master list records, outstanding supplier balances, and purchasing histories.
+- Keep answers professional, precise, and merchant-focused.
+`,
+  'Customer Relationship Manager': `
+ROLE: Customer Relationship Manager
+RESPONSIBILITIES: Manage B2B customer credit profiles, analyze receivables, track payment terms compliance, monitor overdue credit limits, and support partner communication.
+CRITICAL OPERATIONAL RULES:
+- Focus on debtor collections, customer outstanding profiles, credit limits, and payment overdue follow-ups.
+- Keep communications polite but structured around company credit guidelines.
+`,
+  'Financial CFO Advisor': `
+ROLE: Financial CFO Advisor
+RESPONSIBILITIES: Analyze profitability, run price/expense simulations, optimize working capital, evaluate operational solvency, and produce executive-grade SME financial recommendations.
 CRITICAL STRATEGIC RULES:
-- You are a strategic CFO adviser. You are expected to produce comprehensive reports, calculated metrics, detailed reasoning, forecasts, and strategic plans.
-- You MUST append the standard [RECOMMENDATION_START] ... [RECOMMENDATION_END] tags with custom reasoning explaining WHY for each metric.
-- Your output can be extensive, detailed, and highly analytical, including professional financial summaries.
+- You are a senior strategic CFO adviser. Produce comprehensive reports, calculated metrics, detailed reasoning, and strategic projections.
+- You MUST append the standard [RECOMMENDATION_START] ... [RECOMMENDATION_END] tags (or [SIMULATION_START] ... [SIMULATION_END] tags) with customized numeric insights and real business reasoning.
 `,
-  'Analytics Engine': `
-ROLE: Analytics Agent
-RESPONSIBILITIES: Dashboard explanation, sales trends, top customers, revenue charts, seasonality, demand forecasting, KPIs, business intelligence.
+  'Analytics Intelligence': `
+ROLE: Analytics Intelligence Agent
+RESPONSIBILITIES: Interpret operational charts, analyze sales velocities, evaluate seasonal demand models, and provide data-driven business intelligence.
 CRITICAL ANALYTICAL RULES:
-- Explain enterprise charts, sales velocities, and customer demographics.
-- Do NOT generate physical warehouse stock adjustments, tax billing forms, or supplier POs.
-- Keep your output professional, analytical, and highly tailored to explaining data and trend diagnostics.
+- Explain enterprise dashboards, KPI progress meters, and graphical trend diagnostics.
+- Keep responses factual, metrics-driven, and structured.
 `
 };
 
@@ -897,145 +945,58 @@ Based on **Apex Builders Supply & Paints** current H1 2026 operational diagnosti
 Please let me know if you would like me to draft formal proposals or finalize invoice templates for this action!`;
 }
 
-// Lazy initialization of Gemini client using client-side API key
-let aiClient: GoogleGenAI | null = null;
-
-function getGeminiClient(): GoogleGenAI | null {
-  if (aiClient) return aiClient;
-
-  // WARNING: Exposing VITE_GEMINI_API_KEY in frontend builds carries security risks.
-  // In production, keep this server-side.
-  const apiKey = (import.meta as any).env?.VITE_GEMINI_API_KEY;
-
-  if (apiKey && apiKey !== 'MY_GEMINI_API_KEY' && apiKey.trim() !== '') {
-    try {
-      aiClient = new GoogleGenAI({
-        apiKey: apiKey,
-        httpOptions: {
-          headers: {
-            'User-Agent': 'aistudio-build',
-          },
-        },
-      });
-      console.log("Client-side Gemini AI successfully initialized.");
-      return aiClient;
-    } catch (err) {
-      console.error("Error initializing client-side Gemini AI SDK:", err);
-    }
-  }
-  return null;
-}
-
-/**
- * Executes a Copilot prompt on the client side using VITE_GEMINI_API_KEY
- */
+// Executes a Copilot prompt by sending a request to the secure server-side proxy
 export async function getCopilotResponse(prompt: string, history: any[] = []): Promise<string> {
-  const client = getGeminiClient();
-
-  // Find memory advice of last document to force model awareness
   const memoryAdvisory = extractContextMemory(history);
   const enhancedPrompt = memoryAdvisory ? `${prompt}\n\n${memoryAdvisory}` : prompt;
 
-  if (!client) {
-    console.log("Gemini API key not configured or invalid. Serving local smart mock backup.");
-    return generateSmartMockResponse(prompt, history);
-  }
-
   try {
-    const agent = classifyIntent(prompt);
-    const agentPrompt = AGENT_SYSTEM_PROMPTS[agent];
-    const combinedInstruction = `${BUSINESS_CONTEXT}\n\n${agentPrompt}`;
-
-    // Ensure history strictly starts with 'user' and alternates roles to comply with Google Gen AI SDK guidelines
-    const formattedHistory: any[] = [];
-    let expectedRole = 'user';
-    
-    for (const msg of (history || [])) {
-      const role = msg.sender === 'user' ? 'user' : 'model';
-      if (role === expectedRole) {
-        formattedHistory.push({
-          role: role,
-          parts: [{ text: msg.content }]
-        });
-        expectedRole = expectedRole === 'user' ? 'model' : 'user';
-      }
-    }
-
-    // Since our new message is of role 'user', if the history ended on a 'user' message
-    // (meaning expectedRole is 'model'), we pop the last item of history to avoid consecutive 'user' turns.
-    if (expectedRole === 'model' && formattedHistory.length > 0) {
-      formattedHistory.pop();
-    }
-
-    const contents = [
-      ...formattedHistory,
-      { role: 'user', parts: [{ text: enhancedPrompt }] }
-    ];
-
-    const response = await client.models.generateContent({
-      model: 'gemini-3.5-flash',
-      contents,
-      config: {
-        systemInstruction: combinedInstruction,
-        temperature: 0.7,
+    const response = await fetch("/api/copilot/response", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
       },
+      body: JSON.stringify({ prompt: enhancedPrompt, history })
     });
 
-    return response.text || generateSmartMockResponse(prompt, history);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data.text || generateSmartMockResponse(prompt, history);
   } catch (error) {
-    console.error("Gemini client-side call failed, falling back:", error);
+    console.warn("Server-side Gemini proxy call failed, falling back to local heuristic engine:", error);
     return generateSmartMockResponse(prompt, history);
   }
 }
 
-function cleanAndParseJSON(text: string): any {
-  let cleaned = text.trim();
-  if (cleaned.startsWith('```')) {
-    cleaned = cleaned.replace(/^```(?:json)?\n?/i, '').replace(/\n?```$/, '').trim();
-  }
-  return JSON.parse(cleaned);
-}
-
-/**
- * Fetches automatic dashboard insights on the client side using VITE_GEMINI_API_KEY
- */
+// Fetches automatic dashboard insights by sending a request to the secure server-side proxy
 export async function getDashboardInsights(): Promise<{ recommendation: string; score: number }> {
-  const client = getGeminiClient();
-
   const fallback = {
     recommendation: 'Reorder UltraShield Premium Paint (20L) and Fine River Sand today. Contact Sharma Traders to collect outstanding ₹1,33,000 payment.',
     score: 84
   };
 
-  if (!client) {
-    return fallback;
-  }
-
   try {
-    const response = await client.models.generateContent({
-      model: 'gemini-3.5-flash',
-      contents: 'Provide a concise, single-sentence summary recommendation to display on the main dashboard for the CEO of Apex Builders Supply, along with an integer score from 1 to 100 indicating the current health of the business (where 100 is perfect and cash-flow/inventory are pristine). Output strictly as JSON.',
-      config: {
-        systemInstruction: BUSINESS_CONTEXT,
-        responseMimeType: 'application/json',
-        responseSchema: {
-          type: 'OBJECT',
-          properties: {
-            recommendation: { type: 'STRING' },
-            score: { type: 'INTEGER' }
-          },
-          required: ['recommendation', 'score']
-        }
+    const response = await fetch("/api/dashboard/insights", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
       }
     });
 
-    const parsed = cleanAndParseJSON(response.text || '{}');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const parsed = await response.json();
     return {
       recommendation: parsed.recommendation || fallback.recommendation,
       score: typeof parsed.score === 'number' ? parsed.score : fallback.score
     };
   } catch (err) {
-    console.error("Dashboard insights client-side call failed:", err);
+    console.warn("Dashboard insights server proxy call failed, falling back to cached local diagnostics:", err);
     return fallback;
   }
 }
