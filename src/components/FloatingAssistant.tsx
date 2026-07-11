@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Bot, X, Send, RefreshCw, MessageSquareCode, Sparkles } from 'lucide-react';
+import { Bot, X, Send, RefreshCw } from 'lucide-react';
 import { Message } from '../types';
 import { getCopilotResponse } from '../lib/gemini';
+import BusinessDocument from './BusinessDocument';
 
 export default function FloatingAssistant() {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,9 +24,8 @@ export default function FloatingAssistant() {
     feedEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isThinking]);
 
-  const handleSendQuickMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = input.trim();
+  const handleSendQuickMessage = async (textToSend: string) => {
+    const trimmed = textToSend.trim();
     if (!trimmed) return;
 
     const userMsg: Message = {
@@ -63,6 +63,18 @@ export default function FloatingAssistant() {
     }
   };
 
+  const handleRegenerate = (msgId: string) => {
+    const idx = messages.findIndex(m => m.id === msgId);
+    if (idx > 0) {
+      for (let i = idx - 1; i >= 0; i--) {
+        if (messages[i].sender === 'user') {
+          handleSendQuickMessage(messages[i].content);
+          break;
+        }
+      }
+    }
+  };
+
   return (
     <div className="fixed bottom-6 right-6 z-50 font-sans print:hidden">
       
@@ -79,7 +91,7 @@ export default function FloatingAssistant() {
 
       {/* Tiny Overlay Chat Window */}
       {isOpen && (
-        <div className="w-80 sm:w-96 h-96 glass-panel border border-slate-800/60 rounded-2xl overflow-hidden flex flex-col shadow-2xl shadow-brand-indigo/10">
+        <div className="w-80 sm:w-96 h-[460px] max-h-[85vh] glass-panel border border-slate-800/60 rounded-2xl overflow-hidden flex flex-col shadow-2xl shadow-brand-indigo/10 animate-scaleup">
           
           {/* Header */}
           <div className="p-3.5 bg-zinc-950/80 border-b border-slate-800/60 flex justify-between items-center shrink-0">
@@ -104,12 +116,22 @@ export default function FloatingAssistant() {
                     <Bot className="w-3.5 h-3.5" />
                   </div>
                 )}
-                <div className={`p-3 rounded-xl max-w-[85%] text-xs leading-relaxed ${
-                  m.sender === 'user'
-                    ? 'bg-brand-indigo/80 text-white rounded-tr-none'
-                    : 'bg-[#09090b]/60 border border-slate-800 text-slate-300 rounded-tl-none'
-                }`}>
-                  <p className="whitespace-pre-wrap">{m.content}</p>
+                <div className="flex-1 min-w-0 max-w-[90%]">
+                  {m.sender === 'assistant' ? (
+                    <BusinessDocument 
+                      text={m.content} 
+                      msgId={m.id} 
+                      onRegenerate={() => handleRegenerate(m.id)}
+                      onSendPrompt={handleSendQuickMessage}
+                    />
+                  ) : (
+                    <div className="p-3 rounded-xl bg-brand-indigo/80 text-white rounded-tr-none text-xs leading-relaxed font-semibold self-end ml-auto max-w-[85%]">
+                      {m.content}
+                    </div>
+                  )}
+                  <span className={`text-[9px] text-slate-500 font-mono mt-1 block ${m.sender === 'user' ? 'text-right' : 'text-left'}`}>
+                    {m.timestamp}
+                  </span>
                 </div>
               </div>
             ))}
@@ -119,8 +141,8 @@ export default function FloatingAssistant() {
                 <div className="p-1.5 rounded-lg bg-[#09090b] border border-slate-800 text-brand-indigo h-fit animate-spin shrink-0">
                   <RefreshCw className="w-3.5 h-3.5" />
                 </div>
-                <div className="p-3 rounded-xl bg-[#09090b]/60 border border-slate-800 text-slate-400 text-xs rounded-tl-none">
-                  <span className="animate-pulse">Analyzing stats...</span>
+                <div className="p-3 rounded-xl bg-[#09090b]/60 border border-slate-800 text-slate-400 text-xs rounded-tl-none flex items-center gap-2">
+                  <span className="animate-pulse">🤖 BizPilot AI is reasoning...</span>
                 </div>
               </div>
             )}
@@ -129,7 +151,10 @@ export default function FloatingAssistant() {
 
           {/* Chat Form Input */}
           <form
-            onSubmit={handleSendQuickMessage}
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSendQuickMessage(input);
+            }}
             className="p-2 border-t border-slate-800/60 bg-zinc-950/60 flex gap-2 shrink-0"
           >
             <input

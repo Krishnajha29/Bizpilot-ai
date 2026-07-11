@@ -1,6 +1,6 @@
 {
   "name": "BizPilot AI",
   "description": "AI-powered Business Copilot and Operating System for SMEs to digitize operations, automate workflows, and generate intelligent insights.",
-  "requestFramePermissions": [],
+  "requestFramePermissions": ["microphone"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -166,8 +166,8 @@ export const INITIAL_CUSTOMERS: Customer[] = [
     email: 'sharma.traders@example.com',
     phone: '+91 98765 43210',
     company: 'Sharma Trading & Co',
-    outstandingBalance: 4200, // Pending payment!
-    totalSpent: 28500,
+    outstandingBalance: 133000, // Pending payment!
+    totalSpent: 964000,
     lastOrderDate: '2026-06-25'
   },
   {
@@ -177,7 +177,7 @@ export const INITIAL_CUSTOMERS: Customer[] = [
     phone: '+91 98234 56789',
     company: 'Verma Infrastructure Group',
     outstandingBalance: 0,
-    totalSpent: 48900,
+    totalSpent: 1250000,
     lastOrderDate: '2026-07-02'
   },
   {
@@ -186,8 +186,8 @@ export const INITIAL_CUSTOMERS: Customer[] = [
     email: 'info@guptasons.com',
     phone: '+91 94567 12345',
     company: 'Gupta Hardware Retailers',
-    outstandingBalance: 1250,
-    totalSpent: 18200,
+    outstandingBalance: 35000,
+    totalSpent: 350000,
     lastOrderDate: '2026-06-18'
   },
   {
@@ -196,8 +196,8 @@ export const INITIAL_CUSTOMERS: Customer[] = [
     email: 'purchasing@elitebuilders.com',
     phone: '+91 88888 77777',
     company: 'Elite Housing Projects',
-    outstandingBalance: 8500, // Large outstanding balance
-    totalSpent: 92400,
+    outstandingBalance: 533000, // Large outstanding balance
+    totalSpent: 2850000,
     lastOrderDate: '2026-07-05'
   },
   {
@@ -207,7 +207,7 @@ export const INITIAL_CUSTOMERS: Customer[] = [
     phone: '+91 71234 56789',
     company: 'Royal Decorators',
     outstandingBalance: 0,
-    totalSpent: 12400,
+    totalSpent: 420000,
     lastOrderDate: '2026-05-12'
   }
 ];
@@ -218,11 +218,11 @@ export const INITIAL_ORDERS: Order[] = [
     customerId: 'c1',
     customerName: 'Sharma Traders',
     date: '2026-06-25',
-    amount: 4200,
+    amount: 133000,
     status: 'pending', // Pending payment
     items: [
-      { productId: 'p1', name: 'UltraShield Premium Wall Paint (20L)', quantity: 30, price: 120 },
-      { productId: 'p7', name: 'Industrial Wood Primer (5L)', quantity: 20, price: 45 }
+      { productId: 'p1', name: 'UltraShield Premium Wall Paint (20L)', quantity: 30, price: 3800 },
+      { productId: 'p7', name: 'Industrial Wood Primer (5L)', quantity: 20, price: 950 }
     ]
   },
   {
@@ -230,11 +230,11 @@ export const INITIAL_ORDERS: Order[] = [
     customerId: 'c2',
     customerName: 'Verma Construction',
     date: '2026-07-02',
-    amount: 9800,
+    amount: 502000,
     status: 'completed',
     items: [
-      { productId: 'p2', name: 'Portland Cement Grade 43 (50kg Bag)', quantity: 1000, price: 8.5 },
-      { productId: 'p3', name: 'TMT Steel Reinforcement Bars (12mm, 1 Ton)', quantity: 1, price: 820 }
+      { productId: 'p2', name: 'Portland Cement Grade 43 (50kg Bag)', quantity: 1000, price: 450 },
+      { productId: 'p3', name: 'TMT Steel Reinforcement Bars (12mm, 1 Ton)', quantity: 1, price: 52000 }
     ]
   },
   {
@@ -242,11 +242,11 @@ export const INITIAL_ORDERS: Order[] = [
     customerId: 'c4',
     customerName: 'Elite Builders & Architects',
     date: '2026-07-05',
-    amount: 8500,
+    amount: 533000,
     status: 'pending',
     items: [
-      { productId: 'p3', name: 'TMT Steel Reinforcement Bars (12mm, 1 Ton)', quantity: 10, price: 820 },
-      { productId: 'p4', name: 'Clay Red Bricks (Pack of 1000)', quantity: 2, price: 150 }
+      { productId: 'p3', name: 'TMT Steel Reinforcement Bars (12mm, 1 Ton)', quantity: 10, price: 52000 },
+      { productId: 'p4', name: 'Clay Red Bricks (Pack of 1000)', quantity: 2, price: 6500 }
     ]
   },
   {
@@ -254,11 +254,11 @@ export const INITIAL_ORDERS: Order[] = [
     customerId: 'c3',
     customerName: 'Gupta & Sons Ltd',
     date: '2026-06-18',
-    amount: 3200,
+    amount: 105000,
     status: 'completed',
     items: [
-      { productId: 'p8', name: 'Premium Teak Plywood (8x4 ft, 18mm)', quantity: 40, price: 65 },
-      { productId: 'p9', name: 'Universal Screws Box (1000 Pcs)', quantity: 50, price: 12 }
+      { productId: 'p8', name: 'Premium Teak Plywood (8x4 ft, 18mm)', quantity: 40, price: 2400 },
+      { productId: 'p9', name: 'Universal Screws Box (1000 Pcs)', quantity: 50, price: 180 }
     ]
   },
   {
@@ -266,11 +266,11 @@ export const INITIAL_ORDERS: Order[] = [
     customerId: 'c1',
     customerName: 'Sharma Traders',
     date: '2026-05-14',
-    amount: 15200,
+    amount: 831000,
     status: 'completed',
     items: [
-      { productId: 'p2', name: 'Portland Cement Grade 43 (50kg Bag)', quantity: 1500, price: 8.5 },
-      { productId: 'p3', name: 'TMT Steel Reinforcement Bars (12mm, 1 Ton)', quantity: 3, price: 820 }
+      { productId: 'p2', name: 'Portland Cement Grade 43 (50kg Bag)', quantity: 1500, price: 450 },
+      { productId: 'p3', name: 'TMT Steel Reinforcement Bars (12mm, 1 Ton)', quantity: 3, price: 52000 }
     ]
   },
   {
@@ -278,11 +278,11 @@ export const INITIAL_ORDERS: Order[] = [
     customerId: 'c5',
     customerName: 'Royal Paints Decor',
     date: '2026-05-12',
-    amount: 6400,
+    amount: 195600,
     status: 'completed',
     items: [
-      { productId: 'p1', name: 'UltraShield Premium Wall Paint (20L)', quantity: 50, price: 120 },
-      { productId: 'p6', name: 'Heavy Duty Brush Set (Pack of 5)', quantity: 16, price: 25 }
+      { productId: 'p1', name: 'UltraShield Premium Wall Paint (20L)', quantity: 50, price: 3800 },
+      { productId: 'p6', name: 'Heavy Duty Brush Set (Pack of 5)', quantity: 16, price: 350 }
     ]
   }
 ];
@@ -311,16 +311,16 @@ export const INITIAL_INSIGHTS: Insight[] = [
     type: 'warning',
     category: 'payments',
     title: 'Pending Payment: Sharma Traders',
-    description: 'An outstanding invoice of ₹42,000 from Sharma Traders has exceeded its 30-day payment cycle terms.',
+    description: 'An outstanding invoice of ₹1,33,000 from Sharma Traders has exceeded its 30-day payment cycle terms.',
     suggestedAction: 'Send automated GST-invoice payment reminder with active ledger.',
-    metric: '₹42,000 overdue'
+    metric: '₹1,33,000 overdue'
   },
   {
     id: 'ins-4',
     type: 'success',
     category: 'sales',
     title: 'Revenue Up 18% This Month',
-    description: 'Monthly gross revenue reached ₹3,21,500, marking a healthy 18% improvement over the preceding 30 days.',
+    description: 'Monthly gross revenue reached ₹22,15,000, marking a healthy 18% improvement over the preceding 30 days.',
     suggestedAction: 'Allocate 5% additional capital to high-margin structural metals (TMT Bars) to compounding profits.',
     metric: '+18% gross rev'
   },
@@ -343,12 +343,12 @@ export const INITIAL_QUOTATIONS: Quotation[] = [
     date: '2026-07-04',
     validUntil: '2026-07-18',
     items: [
-      { productId: 'p2', name: 'Portland Cement Grade 43 (50kg Bag)', quantity: 300, price: 8.5 },
-      { productId: 'p3', name: 'TMT Steel Reinforcement Bars (12mm, 1 Ton)', quantity: 2, price: 820 }
+      { productId: 'p2', name: 'Portland Cement Grade 43 (50kg Bag)', quantity: 300, price: 450 },
+      { productId: 'p3', name: 'TMT Steel Reinforcement Bars (12mm, 1 Ton)', quantity: 2, price: 52000 }
     ],
     discount: 5,
     gstRate: 18,
-    total: 4181.30,
+    total: 267919,
     status: 'sent'
   },
   {
@@ -358,12 +358,12 @@ export const INITIAL_QUOTATIONS: Quotation[] = [
     date: '2026-07-06',
     validUntil: '2026-07-20',
     items: [
-      { productId: 'p1', name: 'UltraShield Premium Wall Paint (20L)', quantity: 15, price: 120 },
-      { productId: 'p7', name: 'Industrial Wood Primer (5L)', quantity: 10, price: 45 }
+      { productId: 'p1', name: 'UltraShield Premium Wall Paint (20L)', quantity: 15, price: 3800 },
+      { productId: 'p7', name: 'Industrial Wood Primer (5L)', quantity: 10, price: 950 }
     ],
     discount: 10,
     gstRate: 18,
-    total: 2148.30,
+    total: 70623,
     status: 'draft'
   }
 ];
@@ -384,20 +384,20 @@ export const DEFAULT_PREFERENCES: BusinessPreferences = {
 };
 
 export const REVENUE_HISTORY = [
-  { month: 'Jan', revenue: 21500, expenses: 14500, profit: 7000 },
-  { month: 'Feb', revenue: 24200, expenses: 16800, profit: 7400 },
-  { month: 'Mar', revenue: 28900, expenses: 19100, profit: 9800 },
-  { month: 'Apr', revenue: 26500, expenses: 18200, profit: 8300 },
-  { month: 'May', revenue: 31200, expenses: 21500, profit: 9700 },
-  { month: 'Jun', revenue: 32150, expenses: 23100, profit: 9050 }
+  { month: 'Jan', revenue: 1250000, expenses: 850000, profit: 400000 },
+  { month: 'Feb', revenue: 1420000, expenses: 980000, profit: 440000 },
+  { month: 'Mar', revenue: 1890000, expenses: 1310000, profit: 580000 },
+  { month: 'Apr', revenue: 1650000, expenses: 1120000, profit: 530000 },
+  { month: 'May', revenue: 2120000, expenses: 1450000, profit: 670000 },
+  { month: 'Jun', revenue: 2215000, expenses: 1610000, profit: 605000 }
 ];
 
 export const CATEGORY_REVENUE = [
-  { name: 'Building Materials', value: 16400, color: '#3b82f6' },
-  { name: 'Paints & Coatings', value: 8900, color: '#ec4899' },
-  { name: 'Metal & Structure', value: 4800, color: '#10b981' },
-  { name: 'Timber & Hardware', value: 3450, color: '#f59e0b' },
-  { name: 'Tools & Accessories', value: 1200, color: '#8b5cf6' }
+  { name: 'Building Materials', value: 980000, color: '#3b82f6' },
+  { name: 'Paints & Coatings', value: 480000, color: '#ec4899' },
+  { name: 'Metal & Structure', value: 350000, color: '#10b981' },
+  { name: 'Timber & Hardware', value: 240000, color: '#f59e0b' },
+  { name: 'Tools & Accessories', value: 110000, color: '#8b5cf6' }
 ];
 
 export const SUPPLIERS = [

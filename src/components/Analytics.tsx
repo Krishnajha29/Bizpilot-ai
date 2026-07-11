@@ -4,6 +4,7 @@ import { AreaChart, Area, BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip,
 import { Sparkles, BarChart2, TrendingUp, DollarSign, Wallet, ShieldCheck, HelpCircle, Activity } from 'lucide-react';
 import { Product, Customer } from '../types';
 import { REVENUE_HISTORY, CATEGORY_REVENUE } from '../mockData';
+import { formatCurrency } from '../lib/format';
 
 interface AnalyticsProps {
   products: Product[];
@@ -14,20 +15,20 @@ interface AnalyticsProps {
 export default function Analytics({ products, customers, currency = 'INR' }: AnalyticsProps) {
   // Compute metrics dynamically
   const customerTrend = [
-    { month: 'Jan', active: 2, totalSpent: 12000 },
-    { month: 'Feb', active: 3, totalSpent: 21000 },
-    { month: 'Mar', active: 4, totalSpent: 35000 },
-    { month: 'Apr', active: 4, totalSpent: 42000 },
-    { month: 'May', active: 5, totalSpent: 64000 },
-    { month: 'Jun', active: 5, totalSpent: 92400 }
+    { month: 'Jan', active: 2, totalSpent: 1200000 },
+    { month: 'Feb', active: 3, totalSpent: 2100000 },
+    { month: 'Mar', active: 4, totalSpent: 3500000 },
+    { month: 'Apr', active: 4, totalSpent: 4200000 },
+    { month: 'May', active: 5, totalSpent: 6400000 },
+    { month: 'Jun', active: 5, totalSpent: 9240000 }
   ];
 
   const expensesBreakdown = [
-    { name: 'Raw Procurement', value: 14500, color: '#6366f1' },
-    { name: 'Freight Logistics', value: 4200, color: '#f59e0b' },
-    { name: 'Admin Payroll', value: 2500, color: '#06b6d4' },
-    { name: 'Marketing Ads', value: 1200, color: '#8b5cf6' },
-    { name: 'Utility Rents', value: 700, color: '#ec4899' }
+    { name: 'Raw Procurement', value: 1150000, color: '#6366f1' },
+    { name: 'Freight Logistics', value: 220000, color: '#f59e0b' },
+    { name: 'Admin Payroll', value: 150000, color: '#06b6d4' },
+    { name: 'Marketing Ads', value: 60000, color: '#8b5cf6' },
+    { name: 'Utility Rents', value: 30000, color: '#ec4899' }
   ];
 
   const symbol = currency === 'INR' ? '₹' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$';
@@ -80,7 +81,7 @@ export default function Analytics({ products, customers, currency = 'INR' }: Ana
             <div>
               <span className="text-[10px] font-bold text-brand-indigo font-mono uppercase tracking-wider block">AI Revenue Summary</span>
               <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                Gross sales display a continuous **18% MoM compound growth** driven by summer project approvals. Profit spreads peaked in June at **28.1%** ({symbol}9,050 net). Net profits are compounding due to our paint distribution margins which offset lower margin commodity builders cement sales.
+                Gross sales display a continuous **18% MoM compound growth** driven by summer project approvals. Profit spreads peaked in June at **27.3%** ({symbol}6,05,000 net). Net profits are compounding due to our paint distribution margins which offset lower margin commodity builders cement sales.
               </p>
             </div>
           </div>
@@ -111,7 +112,7 @@ export default function Analytics({ products, customers, currency = 'INR' }: Ana
             <div>
               <span className="text-[10px] font-bold text-brand-indigo font-mono uppercase tracking-wider block">AI Expense Summary</span>
               <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                Operating expenditures reached **{symbol}23,100** in June. High-velocity raw materials procurement consumes **62%** of general capital. However, logistics/freight outlays rose by **15%** due to TMT Reinforcement Steel metal deliveries. Renegotiating fuel surcharges will recover 3.2% net.
+                Operating expenditures reached **{symbol}16,10,000** in June. High-velocity raw materials procurement consumes **62%** of general capital. However, logistics/freight outlays rose by **15%** due to TMT Reinforcement Steel metal deliveries. Renegotiating fuel surcharges will recover 3.2% net.
               </p>
             </div>
           </div>
@@ -147,7 +148,7 @@ export default function Analytics({ products, customers, currency = 'INR' }: Ana
             <div>
               <span className="text-[10px] font-bold text-brand-indigo font-mono uppercase tracking-wider block">AI Client Summary</span>
               <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                Cumulative contractor billing crossed **{symbol}92,400**. **Elite Builders & Architects** and **Verma Construction** generate **68%** of total revenue. Elite Builders represents a concentration risk. Mitigate by increasing retail paint distributor integrations or hardware dealer signups.
+                Cumulative contractor billing crossed **{symbol}58,34,000**. **Elite Builders & Architects** and **Verma Construction** generate **68%** of total revenue. Elite Builders represents a concentration risk. Mitigate by increasing retail paint distributor integrations or hardware dealer signups.
               </p>
             </div>
           </div>
@@ -186,7 +187,7 @@ export default function Analytics({ products, customers, currency = 'INR' }: Ana
               <div key={index} className="flex items-center gap-2 text-xs">
                 <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
                 <span className="text-slate-400 truncate max-w-[120px]">{item.name}</span>
-                <span className="font-semibold text-slate-300 font-mono ml-auto">{symbol}{item.value.toLocaleString()}</span>
+                <span className="font-semibold text-slate-300 font-mono ml-auto">{formatCurrency(item.value)}</span>
               </div>
             ))}
           </div>
@@ -197,7 +198,7 @@ export default function Analytics({ products, customers, currency = 'INR' }: Ana
             <div>
               <span className="text-[10px] font-bold text-brand-indigo font-mono uppercase tracking-wider block">AI Inventory Capital Summary</span>
               <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                Warehouse capital allocation stands at **{symbol}23,600**. Heavy physical items (Cement bags, reinforcement steel steel bundles) represent **72%** of physical valuation. Optimize inventory turnovers of paint lines to unlock blocked cash and reduce warehousing fees.
+                Warehouse capital allocation stands at **{symbol}16,10,000**. Heavy physical items (Cement bags, reinforcement steel bundles) represent **72%** of physical valuation. Optimize inventory turnovers of paint lines to unlock blocked cash and reduce warehousing fees.
               </p>
             </div>
           </div>

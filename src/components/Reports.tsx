@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { FileText, Download, Sparkles, AlertCircle, TrendingUp, DollarSign, Calendar, RefreshCw, BarChart2, ShieldCheck, CheckCircle2 } from 'lucide-react';
 import { Product, Customer, Order, Insight } from '../types';
+import { REVENUE_HISTORY } from '../mockData';
+import { formatCurrency } from '../lib/format';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -23,9 +25,9 @@ export default function Reports({ products, customers, orders, insights, currenc
 
   // Stats summaries
   const totalOutstanding = customers.reduce((sum, c) => sum + c.outstandingBalance, 0);
-  const totalRevenue = 32150; // June
-  const totalCost = 23100; // June
-  const netMarginVal = totalRevenue - totalCost;
+  const totalRevenue = REVENUE_HISTORY[REVENUE_HISTORY.length - 1].revenue; // June
+  const totalCost = REVENUE_HISTORY[REVENUE_HISTORY.length - 1].expenses; // June
+  const netMarginVal = REVENUE_HISTORY[REVENUE_HISTORY.length - 1].profit; // June
 
   const handleExportPDF = async () => {
     const element = document.getElementById('report-slate');
@@ -183,17 +185,17 @@ export default function Reports({ products, customers, orders, insights, currenc
                 <div className="grid grid-cols-3 gap-6">
                   <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
                     <span className="text-[10px] font-bold text-gray-400 block uppercase">June Gross Revenue</span>
-                    <span className="text-lg font-bold font-mono text-gray-900 block mt-1">{symbol}{totalRevenue.toLocaleString()}</span>
+                    <span className="text-lg font-bold font-mono text-gray-900 block mt-1">{formatCurrency(totalRevenue)}</span>
                     <span className="text-[10px] text-emerald-600 font-semibold mt-1 block">▲ +18.4% MoM Growth</span>
                   </div>
                   <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
                     <span className="text-[10px] font-bold text-gray-400 block uppercase">June Net Profit</span>
-                    <span className="text-lg font-bold font-mono text-gray-900 block mt-1">{symbol}{netMarginVal.toLocaleString()}</span>
+                    <span className="text-lg font-bold font-mono text-gray-900 block mt-1">{formatCurrency(netMarginVal)}</span>
                     <span className="text-[10px] text-amber-500 font-semibold mt-1 block">▼ -3% steel freight slip</span>
                   </div>
                   <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
                     <span className="text-[10px] font-bold text-gray-400 block uppercase">Accounts Receivable</span>
-                    <span className="text-lg font-bold font-mono text-gray-900 block mt-1">{symbol}{totalOutstanding.toLocaleString()}</span>
+                    <span className="text-lg font-bold font-mono text-gray-900 block mt-1">{formatCurrency(totalOutstanding)}</span>
                     <span className="text-[10px] text-red-500 font-semibold mt-1 block">● 2 large buyer dues late</span>
                   </div>
                 </div>
@@ -210,13 +212,15 @@ export default function Reports({ products, customers, orders, insights, currenc
                           <th className="p-3 font-semibold font-display text-right">Net Margin Profit</th>
                         </tr>
                       </thead>
-                      <tbody className="text-gray-600 font-mono">
-                        <tr className="border-b border-gray-100"><td className="p-3 font-sans font-medium text-gray-800">January 2026</td><td className="p-3 text-right">{symbol}21,500.00</td><td className="p-3 text-right">{symbol}14,500.00</td><td className="p-3 text-right text-emerald-600 font-bold">{symbol}7,000.00</td></tr>
-                        <tr className="border-b border-gray-100"><td className="p-3 font-sans font-medium text-gray-800">February 2026</td><td className="p-3 text-right">{symbol}24,200.00</td><td className="p-3 text-right">{symbol}16,800.00</td><td className="p-3 text-right text-emerald-600 font-bold">{symbol}7,400.00</td></tr>
-                        <tr className="border-b border-gray-100"><td className="p-3 font-sans font-medium text-gray-800">March 2026</td><td className="p-3 text-right">{symbol}28,900.00</td><td className="p-3 text-right">{symbol}19,100.00</td><td className="p-3 text-right text-emerald-600 font-bold">{symbol}9,800.00</td></tr>
-                        <tr className="border-b border-gray-100"><td className="p-3 font-sans font-medium text-gray-800">April 2026</td><td className="p-3 text-right">{symbol}26,500.00</td><td className="p-3 text-right">{symbol}18,200.00</td><td className="p-3 text-right text-emerald-600 font-bold">{symbol}8,300.00</td></tr>
-                        <tr className="border-b border-gray-100"><td className="p-3 font-sans font-medium text-gray-800">May 2026</td><td className="p-3 text-right">{symbol}31,200.00</td><td className="p-3 text-right">{symbol}21,500.00</td><td className="p-3 text-right text-emerald-600 font-bold">{symbol}9,700.00</td></tr>
-                        <tr className="border-b border-gray-100"><td className="p-3 font-sans font-medium text-gray-800">June 2026</td><td className="p-3 text-right">{symbol}32,150.00</td><td className="p-3 text-right">{symbol}23,100.00</td><td className="p-3 text-right text-emerald-600 font-bold">{symbol}9,050.00</td></tr>
+                      <tbody className="text-gray-600 font-mono text-[11px]">
+                        {REVENUE_HISTORY.map((row, index) => (
+                          <tr key={index} className="border-b border-gray-100">
+                            <td className="p-3 font-sans font-medium text-gray-800">{row.month} 2026</td>
+                            <td className="p-3 text-right">{symbol}{row.revenue.toLocaleString()}</td>
+                            <td className="p-3 text-right">{symbol}{row.expenses.toLocaleString()}</td>
+                            <td className="p-3 text-right text-emerald-600 font-bold">{symbol}{row.profit.toLocaleString()}</td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
@@ -250,7 +254,7 @@ export default function Reports({ products, customers, orders, insights, currenc
                           <tr key={o.id} className="border-b border-gray-100">
                             <td className="p-3 font-bold text-gray-500">{o.id}</td>
                             <td className="p-3 font-sans font-medium text-gray-800">{o.customerName}</td>
-                            <td className="p-3 font-bold text-gray-900">{symbol}{o.amount.toFixed(2)}</td>
+                            <td className="p-3 font-bold text-gray-900">{formatCurrency(o.amount, true)}</td>
                             <td className="p-3 font-sans">
                               <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${o.status === 'completed' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
                                 {o.status}
@@ -320,8 +324,8 @@ export default function Reports({ products, customers, orders, insights, currenc
                 
                 <div className="p-4 rounded-xl bg-amber-50 border border-amber-100 text-amber-800">
                   <span className="text-[10px] font-bold text-amber-500 block uppercase">TOTAL OVERDUE OUTSTANDINGS</span>
-                  <p className="text-lg font-bold font-mono mt-1">{symbol}{totalOutstanding.toLocaleString()}</p>
-                  <p className="text-[10px] text-amber-600 mt-1 leading-relaxed">Overdue receivables affect operating liquidity. Contact Sharma Traders ({symbol}4.2k) and Elite Builders ({symbol}8.5k) immediately.</p>
+                  <p className="text-lg font-bold font-mono mt-1">{formatCurrency(totalOutstanding)}</p>
+                  <p className="text-[10px] text-amber-600 mt-1 leading-relaxed">Overdue receivables affect operating liquidity. Contact Sharma Traders ({formatCurrency(420000)}) and Elite Builders ({formatCurrency(850000)}) immediately.</p>
                 </div>
 
                 <div className="space-y-3">
@@ -341,9 +345,9 @@ export default function Reports({ products, customers, orders, insights, currenc
                           <tr key={c.id} className="border-b border-gray-100">
                             <td className="p-3 font-sans font-medium text-gray-800">{c.name}</td>
                             <td className="p-3 font-sans text-gray-500">{c.company}</td>
-                            <td className="p-3 text-right">{symbol}{c.totalSpent.toLocaleString()}</td>
+                            <td className="p-3 text-right">{formatCurrency(c.totalSpent)}</td>
                             <td className={`p-3 text-right font-bold ${c.outstandingBalance > 0 ? 'text-amber-600' : 'text-emerald-600'}`}>
-                              {symbol}{c.outstandingBalance.toLocaleString()}
+                              {formatCurrency(c.outstandingBalance)}
                             </td>
                           </tr>
                         ))}
@@ -361,7 +365,7 @@ export default function Reports({ products, customers, orders, insights, currenc
                 <div>
                   <span className="text-[9px] font-bold text-indigo-600 font-mono uppercase tracking-wider block">BizPilot AI CFO Summary Recommendation</span>
                   <p className="text-[11px] text-gray-600 mt-1 leading-relaxed italic">
-                    "Based on statistical data compiled on July 2026, Apex Builders Supply shows healthy 18% sales growth, but liquidity is impacted by overdue accounts receivable ({symbol}13,950 total). Directing immediate cash collections while simultaneously ordering paint stock (5 left) is highly recommended."
+                    "Based on statistical data compiled on July 2026, Apex Builders Supply shows healthy 18% sales growth, but liquidity is impacted by overdue accounts receivable ({formatCurrency(totalOutstanding)} total). Directing immediate cash collections while simultaneously ordering paint stock (5 left) is highly recommended."
                   </p>
                 </div>
               </div>

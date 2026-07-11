@@ -1,3 +1,13 @@
+export interface PurchaseHistoryItem {
+  date: string;
+  invoiceNumber: string;
+  supplierName: string;
+  quantity: number;
+  unitPrice: number;
+  gstPaid: number;
+  totalAmount: number;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -10,6 +20,71 @@ export interface Product {
   unit: string;
   aiRecommendation: string;
   salesGrowth: number; // monthly %
+  // ERP Extensions
+  hsnCode?: string;
+  gstRate?: number;
+  warehouseLocation?: string;
+  purchaseHistory?: PurchaseHistoryItem[];
+  sku?: string;
+}
+
+export interface InventoryMovement {
+  id: string;
+  productId: string;
+  productName: string;
+  type: 'Purchase' | 'Sale' | 'Adjustment' | 'Return';
+  quantity: number;
+  date: string;
+  reference: string;
+  user: string;
+  stockAfter: number;
+}
+
+export interface SupplierLedgerEntry {
+  id: string;
+  supplierName: string;
+  date: string;
+  transactionType: 'Bill' | 'Payment' | 'Opening Balance';
+  reference: string;
+  amount: number;
+  balance: number;
+}
+
+export interface PurchaseOrder {
+  id: string;
+  poNumber: string;
+  supplierName: string;
+  date: string;
+  status: 'Pending' | 'Received' | 'Partially Received';
+  items: Array<{
+    productName: string;
+    productId?: string;
+    quantity: number;
+    receivedQuantity: number;
+    unit: string;
+    price: number;
+    hsnCode?: string;
+    gstRate?: number;
+  }>;
+  totalAmount: number;
+}
+
+export interface Supplier {
+  id: string;
+  companyName: string;
+  gst?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  paymentTerms?: string;
+  outstandingBalance: number;
+  purchaseHistory?: Array<{
+    date: string;
+    invoiceNumber: string;
+    amount: number;
+    status: string;
+  }>;
+  productsSupplied?: string[];
 }
 
 export interface Customer {
@@ -21,6 +96,11 @@ export interface Customer {
   outstandingBalance: number;
   totalSpent: number;
   lastOrderDate: string;
+  gstNumber?: string;
+  billingAddress?: string;
+  shippingAddress?: string;
+  creditLimit?: number;
+  paymentTerms?: string;
 }
 
 export interface Order {

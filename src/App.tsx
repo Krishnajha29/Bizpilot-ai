@@ -12,15 +12,21 @@ import Reports from './components/Reports';
 import Settings from './components/Settings';
 import FloatingAssistant from './components/FloatingAssistant';
 
-import { Product, Customer, Order, Insight, CompanyProfile, BusinessPreferences } from './types';
+import { Product, Customer, Order, Insight, CompanyProfile, BusinessPreferences, InventoryMovement, SupplierLedgerEntry, PurchaseOrder, Supplier } from './types';
 import {
-  INITIAL_PRODUCTS,
   INITIAL_CUSTOMERS,
   INITIAL_ORDERS,
   INITIAL_INSIGHTS,
   DEFAULT_COMPANY,
   DEFAULT_PREFERENCES
 } from './mockData';
+import {
+  getEnrichedProducts,
+  INITIAL_MOVEMENTS,
+  INITIAL_SUPPLIER_LEDGERS,
+  INITIAL_PURCHASE_ORDERS,
+  INITIAL_SUPPLIERS
+} from './erpMockData';
 
 export default function App() {
   // Core Page Router states
@@ -30,7 +36,11 @@ export default function App() {
   const [copilotInitialPrompt, setCopilotInitialPrompt] = useState<string | undefined>(undefined);
 
   // Dynamic SME business states
-  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
+  const [products, setProducts] = useState<Product[]>(getEnrichedProducts());
+  const [movements, setMovements] = useState<InventoryMovement[]>(INITIAL_MOVEMENTS);
+  const [supplierLedger, setSupplierLedger] = useState<SupplierLedgerEntry[]>(INITIAL_SUPPLIER_LEDGERS);
+  const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>(INITIAL_PURCHASE_ORDERS);
+  const [suppliers, setSuppliers] = useState<Supplier[]>(INITIAL_SUPPLIERS);
   const [customers, setCustomers] = useState<Customer[]>(INITIAL_CUSTOMERS);
   const [orders, setOrders] = useState<Order[]>(INITIAL_ORDERS);
   const [insights, setInsights] = useState<Insight[]>(INITIAL_INSIGHTS);
@@ -176,7 +186,7 @@ export default function App() {
       </aside>
 
       {/* Main Workspace Frame */}
-      <main className="flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full overflow-x-hidden print:p-0">
+      <main className={activeView === 'copilot' ? "flex-1 h-[calc(100vh-64px)] md:h-screen flex flex-col overflow-hidden w-full print:p-0" : "flex-1 p-6 md:p-10 max-w-7xl mx-auto w-full overflow-x-hidden print:p-0"}>
         
         {/* Render View Components */}
         {activeView === 'dashboard' && (
@@ -201,6 +211,15 @@ export default function App() {
         {activeView === 'inventory' && (
           <Inventory
             products={products}
+            setProducts={setProducts}
+            movements={movements}
+            setMovements={setMovements}
+            supplierLedger={supplierLedger}
+            setSupplierLedger={setSupplierLedger}
+            suppliers={suppliers}
+            setSuppliers={setSuppliers}
+            purchaseOrders={purchaseOrders}
+            setPurchaseOrders={setPurchaseOrders}
             onRestock={handleRestockProduct}
             onNavigateToCopilot={handleNavigateToCopilot}
             currency={companyProfile.currency}
@@ -211,6 +230,7 @@ export default function App() {
           <QuotationGenerator
             products={products}
             customers={customers}
+            setCustomers={setCustomers}
             onAddQuotation={handleAddQuotationAsOrder}
             currency={companyProfile.currency}
           />
